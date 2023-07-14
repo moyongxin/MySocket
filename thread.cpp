@@ -106,24 +106,9 @@ int CThreadPool::StopAll(){
     if(shutdown)return -1;
     shutdown=true;
     pthread_cond_broadcast(&pthreadCond);
-    deque<pthread_t>NoJoined;
     //阻塞所有线程
     for(int i=0;i<TaskNum;i++){
-        if(find(pthread_id[i])!=BusyQue.end()){
-            NoJoined.push_back(pthread_id[i]);
-            continue;
-        }
         pthread_join(pthread_id[i], NULL);
-    }
-    while(!NoJoined.empty()){
-        auto e = NoJoined.end();
-        for(auto p=NoJoined.begin();p!=e;p++)
-            if(find(*p)==BusyQue.end()){
-                pthread_join(*p, NULL);
-                p=NoJoined.erase(p);
-                e=NoJoined.end();
-            }
-        this->Sleep(50);
     }
     free(pthread_id);
     pthread_id=NULL;
